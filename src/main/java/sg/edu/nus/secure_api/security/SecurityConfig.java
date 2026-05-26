@@ -30,6 +30,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/secure/**").authenticated()
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(401);
+                            response.getWriter().write("Unauthorized: JWT token is missing or invalid");
+                        })
+                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

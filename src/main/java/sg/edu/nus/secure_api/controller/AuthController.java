@@ -18,8 +18,12 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
-        String token = authService.login(request.getUsername(), request.getPassword());
-        return ResponseEntity.ok(new LoginResponse(token));
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        try {
+            String token = authService.login(request.getUsername(), request.getPassword());
+            return ResponseEntity.ok(new LoginResponse(token));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body("Invalid username or password");
+        }
     }
 }
