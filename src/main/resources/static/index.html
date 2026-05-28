@@ -7,46 +7,61 @@
         body {
             font-family: Arial, sans-serif;
             background: #f4f6f8;
+            margin: 0;
             padding: 40px;
         }
 
         .container {
-            max-width: 700px;
+            max-width: 850px;
             margin: auto;
             background: white;
-            padding: 24px;
             border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
         }
 
         h1 {
             margin-top: 0;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 24px;
+        }
+
+        .section {
+            margin-top: 24px;
+            padding-top: 18px;
+            border-top: 1px solid #ddd;
         }
 
         input, button {
-            padding: 10px;
-            margin: 6px 0;
             width: 100%;
             box-sizing: border-box;
+            padding: 10px;
+            margin: 6px 0;
+            font-size: 15px;
         }
 
         button {
-            cursor: pointer;
             background: #2563eb;
             color: white;
             border: none;
             border-radius: 6px;
             font-weight: bold;
+            cursor: pointer;
         }
 
         button:hover {
             background: #1d4ed8;
         }
 
-        .section {
-            margin-top: 24px;
-            padding-top: 16px;
-            border-top: 1px solid #ddd;
+        .button-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
         }
 
         pre {
@@ -55,41 +70,75 @@
             border-radius: 8px;
             white-space: pre-wrap;
             word-break: break-word;
+            min-height: 40px;
         }
 
         .hint {
             color: #666;
             font-size: 14px;
         }
+
+        .demo-users {
+            background: #eef6ff;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
     </style>
 </head>
+
 <body>
 <div class="container">
     <h1>Secure API JWT Demo</h1>
-    <p class="hint">
-        This page demonstrates login, JWT generation, and access to a protected REST API.
+    <p class="subtitle">
+        This demo shows database login, JWT generation, and role-based REST API access.
     </p>
 
+    <div class="demo-users">
+        <strong>Demo users from MySQL:</strong><br>
+        alice / password123 / USER<br>
+        admin / admin123 / ADMIN
+    </div>
+
     <div class="section">
-        <h2>1. Login</h2>
+        <h2>1. Login & Database Check</h2>
+        <p class="hint">
+            The backend checks the username and password in the MySQL users table.
+            If valid, it reads the user's role and generates a JWT.
+        </p>
 
         <input id="username" value="alice" placeholder="Username">
         <input id="password" value="password123" placeholder="Password" type="password">
 
-        <button onclick="login()">Login and Get JWT</button>
+        <button onclick="login()">Login and Check Database</button>
 
-        <h3>JWT Token</h3>
-        <pre id="tokenOutput">No token yet.</pre>
+        <h3>Database Check Result</h3>
+        <pre id="dbOutput">No login attempt yet.</pre>
     </div>
 
     <div class="section">
-        <h2>2. Call Protected API</h2>
+        <h2>2. JWT Token</h2>
+        <p class="hint">
+            After successful login, the server returns a signed JWT. The frontend sends this token in the Authorization header.
+        </p>
 
-        <button onclick="callProtectedApi()">Call /api/secure/hello with JWT</button>
-        <button onclick="callProtectedApiWithoutToken()">Call /api/secure/hello without JWT</button>
+        <pre id="tokenOutput">No JWT token yet.</pre>
+    </div>
+
+    <div class="section">
+        <h2>3. Access APIs</h2>
+        <p class="hint">
+            Public API needs no account. User API needs a valid JWT. Admin API needs a valid JWT with role = ADMIN.
+        </p>
+
+        <div class="button-row">
+            <button onclick="accessPublicApi()">Access Public API</button>
+            <button onclick="accessUserApi()">Access User API</button>
+            <button onclick="accessAdminApi()">Access Admin API</button>
+        </div>
 
         <h3>API Response</h3>
-        <pre id="apiOutput">No API response yet.</pre>
+        <pre id="apiOutput">No API call yet.</pre>
     </div>
 </div>
 
@@ -99,6 +148,10 @@
     async function login() {
         const username = document.getElementById("username").value;
         const password = document.getElementById("password").value;
+
+        document.getElementById("dbOutput").textContent = "Checking MySQL database...";
+        document.getElementById("tokenOutput").textContent = "No JWT token yet.";
+        jwtToken = "";
 
         try {
             const response = await fetch("/api/auth/login", {
@@ -111,50 +164,65 @@
 
             if (!response.ok) {
                 const errorText = await response.text();
-                document.getElementById("tokenOutput").textContent =
-                    "Login failed: " + errorText;
+
+                document.getElementById("dbOutput").textContent =
+                    "Status: " + response.status + "\n\n" +
+                    "Database check failed.\n" +
+                    "Reason: " + errorText;
+
                 return;
             }
 
             const data = await response.json();
             jwtToken = data.token;
 
+            document.getElementById("dbOutput").textContent =
+                "Status: " + response.status + "\n\n" +
+                data.message + "\n\n" +
+                "Username from database: " + data.username + "\n" +
+                "Role from database: " + data.role;
+
             document.getElementById("tokenOutput").textContent = jwtToken;
+
         } catch (error) {
-            document.getElementById("tokenOutput").textContent =
+            document.getElementById("dbOutput").textContent =
                 "Error: " + error.message;
         }
     }
 
-    async function callProtectedApi() {
+    async function accessPublicApi() {
+        await callApi("/api/public/hello", false);
+    }
+
+    async function accessUserApi() {
+        await callApi("/api/secure/hello", true);
+    }
+
+    async function accessAdminApi() {
+        await callApi("/api/admin/hello", true);
+    }
+
+    async function callApi(url, useToken) {
         try {
-            const response = await fetch("/api/secure/hello", {
+            const headers = {};
+
+            if (useToken) {
+                headers["Authorization"] = "Bearer " + jwtToken;
+            }
+
+            const response = await fetch(url, {
                 method: "GET",
-                headers: {
-                    "Authorization": "Bearer " + jwtToken
-                }
+                headers: headers
             });
 
             const text = await response.text();
 
             document.getElementById("apiOutput").textContent =
-                "Status: " + response.status + "\n\n" + text;
-        } catch (error) {
-            document.getElementById("apiOutput").textContent =
-                "Error: " + error.message;
-        }
-    }
+                "Request: GET " + url + "\n" +
+                "JWT sent: " + (useToken ? "Yes" : "No") + "\n" +
+                "Status: " + response.status + "\n\n" +
+                text;
 
-    async function callProtectedApiWithoutToken() {
-        try {
-            const response = await fetch("/api/secure/hello", {
-                method: "GET"
-            });
-
-            const text = await response.text();
-
-            document.getElementById("apiOutput").textContent =
-                "Status: " + response.status + "\n\n" + text;
         } catch (error) {
             document.getElementById("apiOutput").textContent =
                 "Error: " + error.message;

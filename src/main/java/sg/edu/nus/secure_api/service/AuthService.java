@@ -2,6 +2,7 @@ package sg.edu.nus.secure_api.service;
 
 import org.springframework.stereotype.Service;
 
+import sg.edu.nus.secure_api.model.LoginResponse;
 import sg.edu.nus.secure_api.model.User;
 import sg.edu.nus.secure_api.repository.UserRepository;
 
@@ -16,7 +17,7 @@ public class AuthService {
         this.userRepository = userRepository;
     }
 
-    public String login(String username, String password) {
+    public LoginResponse login(String username, String password) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Invalid username or password"));
 
@@ -24,6 +25,17 @@ public class AuthService {
             throw new RuntimeException("Invalid username or password");
         }
 
-        return jwtService.generateToken(user.getUsername(), user.getRole());
+        String token = jwtService.generateToken(user.getUsername(), user.getRole());
+
+        String message = "User found in database. Password verified. Role = "
+                + user.getRole()
+                + ". JWT generated successfully.";
+
+        return new LoginResponse(
+                token,
+                user.getUsername(),
+                user.getRole(),
+                message
+        );
     }
 }
