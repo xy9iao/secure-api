@@ -53,9 +53,9 @@ Current structure and behavior:
 
 Important current limitations to address in the enhanced version:
 
-- The frontend currently demonstrates login and API buttons in one page. The planned version should behave like a small web app with login, product, and unauthorized states.
-- The frontend still contains old classroom demo wording and should be updated during the frontend task.
-- Product ownership and ADMIN visibility are implemented in the backend, but the frontend still needs to call `GET /api/products`.
+- The frontend now has login, product, unauthorized, JWT display, product loading, and logout states split across `index.html`, `styles.css`, and `app.js`.
+- The product view is currently routed with `#products`; a separate static product page can be added later if the lesson needs a visible `/products.html` URL.
+- Old classroom demo endpoints such as `/api/secure/hello` and `/api/admin/hello` still exist and can be removed later if the final app should only show the car-rental flow.
 
 ## Teaching Goals
 
