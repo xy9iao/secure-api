@@ -11,5 +11,5 @@ CREATE TABLE IF NOT EXISTS users (
 
 INSERT IGNORE INTO users (username, password, role)
 VALUES
-('alice', 'password123', 'USER'),
+('user', 'user123', 'USER'),
 ('admin', 'admin123', 'ADMIN');
