@@ -2,7 +2,19 @@
 
 This project is a Java Spring Boot demo application that simulates secure client-server communication through RESTful APIs using JWT authentication.
 
-The demo shows how a client logs in with a username and password, receives a JWT token from the server, and then uses that token to access protected API endpoints.
+It demonstrates how a client logs in with a username and password, how the backend checks user information from a MySQL database, how the server generates a JWT token, and how protected APIs use that JWT token for authentication and role-based authorization.
+
+## Features
+
+- RESTful API login endpoint
+- MySQL database user table
+- JWT token generation
+- JWT token validation
+- Spring Security filter chain
+- Public API access without login
+- User-level protected API access
+- Admin-only API access
+- Simple frontend dashboard
 
 ## Tech Stack
 
@@ -10,91 +22,121 @@ The demo shows how a client logs in with a username and password, receives a JWT
 - Spring Boot
 - Spring Web
 - Spring Security
+- Spring Data JPA
+- MySQL
 - JWT
 - Maven
+- HTML / CSS / JavaScript
 
-## Project Structure
+## Database Setup
+
+This project uses a local MySQL database.
+
+Students who clone this repo need to create their own local database. The database is not included in GitHub.
+
+### Step 1: Install MySQL
+
+Install MySQL and MySQL Workbench on your computer.
+
+### Step 2: Run the database script
+
+Open MySQL Workbench and run the script saved in:
 
 ```text
-src/main/java/sg/edu/nus/secure_api
-├── controller
-│   ├── AuthController.java
-│   └── SecureController.java
-├── model
-│   ├── LoginRequest.java
-│   └── LoginResponse.java
-├── security
-│   ├── JwtAuthenticationFilter.java
-│   └── SecurityConfig.java
-├── service
-│   ├── AuthService.java
-│   └── JwtService.java
-└── SecureApiApplication.java
-Demo Account
-username: alice
-password: password123
-Run the Application
+database/init.sql
+```
+
+## Application Configuration
+
+Open:
+
+`src/main/resources/application.properties`
+
+Use this configuration:
+
+```properties
+spring.application.name=secure_api
+
+spring.datasource.url=jdbc:mysql://localhost:3306/secure_api_db
+spring.datasource.username=${DB_USERNAME}
+spring.datasource.password=${DB_PASSWORD}
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+```
+
+The database username and password are read from environment variables or you can directly set in the configuration file.
+
+Do not commit your real MySQL password to GitHub.
+
+## Run the Application
+
+From the project root, set your MySQL username and password or set in the configuration file.
+
+PowerShell:
+
+```powershell
+$env:DB_USERNAME="root"
+$env:DB_PASSWORD="your_mysql_password"
+```
+
+Run:
+
+```powershell
 .\mvnw spring-boot:run
+```
 
-Or, if Maven is installed globally:
+The application will start at (browser):
 
-mvn spring-boot:run
-
-The application runs on:
-
+```text
 http://localhost:8080
-API Endpoints
-1. Login
+```
+
+## Expected Access Behavior
+
+| Login Status  | Public API | User API         | Admin API        |
+| ------------- | ---------- | ---------------- | ---------------- |
+| Not logged in | 200 OK     | 401 Unauthorized | 401 Unauthorized |
+| alice / USER  | 200 OK     | 200 OK           | 401 Unauthorized |
+| admin / ADMIN | 200 OK     | 200 OK           | 200 OK           |
+
+
+
+## Request Flow
+
+### Login Flow
+
+```text
+Frontend
+↓
 POST /api/auth/login
+↓
+AuthController
+↓
+AuthService
+↓
+UserRepository
+↓
+MySQL users table
+↓
+JwtService
+↓
+Return JWT to frontend
+```
 
-Request body:
+### Protected API Flow
 
-{
-  "username": "alice",
-  "password": "password123"
-}
-
-Successful response:
-
-{
-  "token": "eyJhbGciOiJIUzI1NiJ9..."
-}
-2. Protected API
-GET /api/secure/hello
-
-This endpoint requires a JWT token in the request header:
-
-Authorization: Bearer <your_token>
-
-Successful response:
-
-Hello, this is a protected API. You can only see this with a valid JWT.
-
-Without a valid JWT token, the request will return an unauthorized or forbidden response.
-
-PowerShell Test Commands
-Login and store token
-$body = @{
-    username = "alice"
-    password = "password123"
-} | ConvertTo-Json
-
-$response = Invoke-RestMethod `
-    -Uri "http://localhost:8080/api/auth/login" `
-    -Method Post `
-    -ContentType "application/json" `
-    -Body $body
-
-$token = $response.token
-$token
-Access protected API with token
-Invoke-RestMethod `
-    -Uri "http://localhost:8080/api/secure/hello" `
-    -Method Get `
-    -Headers @{ Authorization = "Bearer $token" }
-Access protected API without token
-Invoke-RestMethod `
-    -Uri "http://localhost:8080/api/secure/hello" `
-    -Method Get
-
-Expected result: unauthorized or forbidden response.
+```text
+Frontend sends request with JWT
+↓
+JwtAuthenticationFilter checks Authorization header
+↓
+JwtService validates token
+↓
+Spring Security stores authenticated user
+↓
+SecurityConfig checks access rules
+↓
+Controller returns response
+```
