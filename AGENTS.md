@@ -28,35 +28,34 @@ When proposing or implementing changes, keep the learning path clear:
 
 ## Current Repository Snapshot
 
-The current codebase is a basic Spring Boot JWT demo, not yet the final web app.
+The current codebase is a Spring Boot JWT demo that is being migrated into the planned car-rental web app.
 
 Current structure and behavior:
 
 - Maven project using Java 17 and Spring Boot.
 - Main package: `sg.edu.nus.secure_api`.
 - Static frontend: `src/main/resources/static/index.html`.
-- Database script: `database/init.sql`.
-- Current database table: `users`.
-- Current model: `User`.
-- Current repository: `UserRepository`.
+- Database scripts: `database/profiles.sql` and `database/products.sql`.
+- Current database tables: `profiles` and `products`.
+- Current domain models: `Profile` and `Product`.
+- Current repositories: `ProfileRepository` and `ProductRepository`.
 - Current login DTOs: `LoginRequest` and `LoginResponse`.
 - Current controllers:
   - `AuthController` handles `POST /api/auth/login`.
+  - `ProductController` handles `GET /api/products`.
   - `PublicController` exposes `GET /api/public/hello`.
   - `SecureController` exposes `GET /api/secure/hello`.
   - `AdminController` exposes `GET /api/admin/hello`.
 - Current JWT code:
   - `JwtService` generates, validates, and reads JWT claims.
   - `JwtAuthenticationFilter` reads the `Authorization: Bearer ...` header.
-  - `SecurityConfig` currently uses Spring Security rules for protected endpoints.
+  - `JwtAuthenticationFilter` enforces protected endpoint access without Spring Security.
 
 Important current limitations to address in the enhanced version:
 
-- `JwtService` currently hard-codes the JWT secret. Move it to configuration backed by `JWT_SECRET`.
-- `application.properties` currently contains a direct database username and placeholder password. Prefer environment variables.
-- `database/init.sql` currently creates `users`; the planned version should use `profiles.sql` and `products.sql`.
 - The frontend currently demonstrates login and API buttons in one page. The planned version should behave like a small web app with login, product, and unauthorized states.
-- The current app uses Spring Security. The planned teaching version should avoid Java EE Security and Spring Boot Security unless the user changes this requirement.
+- The frontend still contains old classroom demo wording and should be updated during the frontend task.
+- Product ownership and ADMIN visibility are implemented in the backend, but the frontend still needs to call `GET /api/products`.
 
 ## Teaching Goals
 
@@ -76,7 +75,7 @@ Students should learn how to:
 
 Do not use Java EE Security or Spring Boot Security for the final teaching implementation unless the user asks otherwise.
 
-The current basic version may include Spring Security, but the planned enhanced version should demonstrate the JWT flow with custom, readable code so students can see what is happening. Use standard Spring MVC components such as controllers, services, filters/interceptors, and repositories where appropriate.
+The current version uses a custom JWT request filter instead of Spring Security so students can see what is happening. Continue using standard Spring MVC components such as controllers, services, filters/interceptors, and repositories where appropriate.
 
 ### JWT Storage
 
@@ -119,7 +118,7 @@ This story gives students a clear reason for authentication, ownership, and role
 
 ## Required Database Changes
 
-Replace the current `database/init.sql` structure with two clearer scripts.
+The old `database/init.sql` structure has been replaced with two clearer scripts.
 
 ### `database/profiles.sql`
 

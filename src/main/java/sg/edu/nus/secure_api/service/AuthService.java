@@ -3,38 +3,38 @@ package sg.edu.nus.secure_api.service;
 import org.springframework.stereotype.Service;
 
 import sg.edu.nus.secure_api.model.LoginResponse;
-import sg.edu.nus.secure_api.model.User;
-import sg.edu.nus.secure_api.repository.UserRepository;
+import sg.edu.nus.secure_api.model.Profile;
+import sg.edu.nus.secure_api.repository.ProfileRepository;
 
 @Service
 public class AuthService {
 
     private final JwtService jwtService;
-    private final UserRepository userRepository;
+    private final ProfileRepository profileRepository;
 
-    public AuthService(JwtService jwtService, UserRepository userRepository) {
+    public AuthService(JwtService jwtService, ProfileRepository profileRepository) {
         this.jwtService = jwtService;
-        this.userRepository = userRepository;
+        this.profileRepository = profileRepository;
     }
 
     public LoginResponse login(String username, String password) {
-        User user = userRepository.findByUsername(username)
+        Profile profile = profileRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Invalid username or password"));
 
-        if (!user.getPassword().equals(password)) {
+        if (!profile.getPassword().equals(password)) {
             throw new RuntimeException("Invalid username or password");
         }
 
-        String token = jwtService.generateToken(user.getUsername(), user.getRole());
+        String token = jwtService.generateToken(profile.getUsername(), profile.getRole());
 
-        String message = "User found in database. Password verified. Role = "
-                + user.getRole()
+        String message = "Profile found in database. Password verified. Role = "
+                + profile.getRole()
                 + ". JWT generated successfully.";
 
         return new LoginResponse(
                 token,
-                user.getUsername(),
-                user.getRole(),
+                profile.getUsername(),
+                profile.getRole(),
                 message
         );
     }

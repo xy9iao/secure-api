@@ -1,10 +1,14 @@
 package sg.edu.nus.secure_api.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "users")
-public class User {
+@Table(name = "profiles")
+public class Profile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,10 +20,10 @@ public class User {
 
     private String role;
 
-    public User() {
+    public Profile() {
     }
 
-    public User(Long id, String username, String password, String role) {
+    public Profile(Long id, String username, String password, String role) {
         this.id = id;
         this.username = username;
         this.password = password;
