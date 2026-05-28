@@ -2,9 +2,6 @@ package sg.edu.nus.secure_api.security;
 
 import java.io.IOException;
 
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -17,6 +14,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    public static final String AUTH_USERNAME = "authUsername";
+    public static final String AUTH_ROLE = "authRole";
 
     private final JwtService jwtService;
 
@@ -31,33 +31,57 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
+        String path = request.getRequestURI();
+
+        if (!isProtectedPath(path)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
+            writeError(response, HttpServletResponse.SC_UNAUTHORIZED,
+                    "Unauthorized: JWT token is missing or invalid");
             return;
         }
 
         String token = authHeader.substring(7);
 
-        if (jwtService.isTokenValid(token)) {
-            String username = jwtService.extractUsername(token);
-            String role = jwtService.extractRole(token);
-        
-            UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(
-                            username,
-                            null,
-                            java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role))
-                    );
-        
-            authenticationToken.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
-            );
-        
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        if (!jwtService.isTokenValid(token)) {
+            writeError(response, HttpServletResponse.SC_UNAUTHORIZED,
+                    "Unauthorized: JWT token is missing or invalid");
+            return;
         }
 
+        String username = jwtService.extractUsername(token);
+        String role = jwtService.extractRole(token);
+
+        if (isAdminPath(path) && !"ADMIN".equals(role)) {
+            writeError(response, HttpServletResponse.SC_FORBIDDEN,
+                    "Forbidden: ADMIN role is required");
+            return;
+        }
+
+        request.setAttribute(AUTH_USERNAME, username);
+        request.setAttribute(AUTH_ROLE, role);
+
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isProtectedPath(String path) {
+        return path.startsWith("/api/secure/")
+                || path.startsWith("/api/admin/")
+                || path.startsWith("/api/products");
+    }
+
+    private boolean isAdminPath(String path) {
+        return path.startsWith("/api/admin/");
+    }
+
+    private void writeError(HttpServletResponse response, int status, String message) throws IOException {
+        response.setStatus(status);
+        response.setContentType("text/plain");
+        response.getWriter().write(message);
     }
 }

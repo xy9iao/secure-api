@@ -10,7 +10,7 @@ It demonstrates how a client logs in with a username and password, how the backe
 - MySQL database user table
 - JWT token generation
 - JWT token validation
-- Spring Security filter chain
+- Custom JWT request filter
 - Public API access without login
 - User-level protected API access
 - Admin-only API access
@@ -21,7 +21,6 @@ It demonstrates how a client logs in with a username and password, how the backe
 - Java
 - Spring Boot
 - Spring Web
-- Spring Security
 - Spring Data JPA
 - MySQL
 - JWT
@@ -55,7 +54,7 @@ Open:
 Use this configuration:
 
 ```properties
-spring.application.name=secure_api
+spring.application.name=secure-api
 
 spring.datasource.url=jdbc:mysql://localhost:3306/secure_api_db
 spring.datasource.username=${DB_USERNAME}
@@ -64,21 +63,25 @@ spring.datasource.password=${DB_PASSWORD}
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
+
+jwt.secret=${JWT_SECRET}
+jwt.expiration-minutes=30
 ```
 
-The database username and password are read from environment variables or you can directly set in the configuration file.
+The database username, database password, and JWT secret are read from environment variables.
 
-Do not commit your real MySQL password to GitHub.
+Do not commit your real MySQL password or JWT secret to GitHub.
 
 ## Run the Application
 
-From the project root, set your MySQL username and password or set in the configuration file.
+From the project root, set your MySQL username, MySQL password, and JWT secret.
 
 PowerShell:
 
 ```powershell
 $env:DB_USERNAME="root"
 $env:DB_PASSWORD="your_mysql_password"
+$env:JWT_SECRET="use-a-long-demo-secret-key-at-least-32-characters"
 ```
 
 Run:
@@ -87,7 +90,7 @@ Run:
 .\mvnw spring-boot:run
 ```
 
-The application will start at (browser):
+The application will start at:
 
 ```text
 http://localhost:8080
@@ -98,10 +101,8 @@ http://localhost:8080
 | Login Status  | Public API | User API         | Admin API        |
 | ------------- | ---------- | ---------------- | ---------------- |
 | Not logged in | 200 OK     | 401 Unauthorized | 401 Unauthorized |
-| alice / USER  | 200 OK     | 200 OK           | 401 Unauthorized |
+| user / USER   | 200 OK     | 200 OK           | 403 Forbidden    |
 | admin / ADMIN | 200 OK     | 200 OK           | 200 OK           |
-
-
 
 ## Request Flow
 
@@ -109,19 +110,19 @@ http://localhost:8080
 
 ```text
 Frontend
-↓
+to
 POST /api/auth/login
-↓
+to
 AuthController
-↓
+to
 AuthService
-↓
+to
 UserRepository
-↓
+to
 MySQL users table
-↓
+to
 JwtService
-↓
+to
 Return JWT to frontend
 ```
 
@@ -129,14 +130,14 @@ Return JWT to frontend
 
 ```text
 Frontend sends request with JWT
-↓
+to
 JwtAuthenticationFilter checks Authorization header
-↓
+to
 JwtService validates token
-↓
-Spring Security stores authenticated user
-↓
-SecurityConfig checks access rules
-↓
+to
+Filter stores username and role on the request
+to
+Filter checks whether the endpoint requires USER or ADMIN access
+to
 Controller returns response
 ```
