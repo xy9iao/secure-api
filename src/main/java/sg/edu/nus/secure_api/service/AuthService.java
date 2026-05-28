@@ -2,7 +2,7 @@ package sg.edu.nus.secure_api.service;
 
 import org.springframework.stereotype.Service;
 
-import sg.edu.nus.secure_api.entity.User;
+import sg.edu.nus.secure_api.model.User;
 import sg.edu.nus.secure_api.repository.UserRepository;
 
 @Service
@@ -24,6 +24,6 @@ public class AuthService {
             throw new RuntimeException("Invalid username or password");
         }
 
-        return jwtService.generateToken(user.getUsername());
+        return jwtService.generateToken(user.getUsername(), user.getRole());
     }
 }

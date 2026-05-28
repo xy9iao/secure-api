@@ -1,4 +1,4 @@
-package sg.edu.nus.secure_api.entity;
+package sg.edu.nus.secure_api.model;
 
 import jakarta.persistence.*;
 
