@@ -57,12 +57,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String username = jwtService.extractUsername(token);
         String role = jwtService.extractRole(token);
 
-        if (isAdminPath(path) && !"ADMIN".equals(role)) {
-            writeError(response, HttpServletResponse.SC_FORBIDDEN,
-                    "Forbidden: ADMIN role is required");
-            return;
-        }
-
         request.setAttribute(AUTH_USERNAME, username);
         request.setAttribute(AUTH_ROLE, role);
 
@@ -70,13 +64,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean isProtectedPath(String path) {
-        return path.startsWith("/api/secure/")
-                || path.startsWith("/api/admin/")
-                || path.startsWith("/api/products");
-    }
-
-    private boolean isAdminPath(String path) {
-        return path.startsWith("/api/admin/");
+        return path.startsWith("/api/products");
     }
 
     private void writeError(HttpServletResponse response, int status, String message) throws IOException {

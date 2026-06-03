@@ -26,8 +26,10 @@ public class AuthController {
             );
 
             return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.status(401).body("Invalid username or password");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(500).body(e.getMessage());
         }
     }
 }

@@ -25,14 +25,6 @@ public class Product {
     public Product() {
     }
 
-    public Product(Long id, String name, String category, String description, String owner) {
-        this.id = id;
-        this.name = name;
-        this.category = category;
-        this.description = description;
-        this.owner = owner;
-    }
-
     public Long getId() {
         return id;
     }

@@ -23,13 +23,6 @@ public class Profile {
     public Profile() {
     }
 
-    public Profile(Long id, String username, String password, String role) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
-        this.role = role;
-    }
-
     public Long getId() {
         return id;
     }

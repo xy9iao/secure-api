@@ -3,108 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Car Rental Portal</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Login</title>
 </head>
 <body>
-<main class="app-shell">
-    <header class="topbar">
-        <div class="brand">
-            <div class="brand-mark">CarRental</div>
-            <div>
-                <h1>Car Rental Portal</h1>
-                <p class="subtitle">Features: JWT login, role-aware product access, and client-side logout.</p>
-            </div>
-        </div>
-        <div id="topUserArea" class="workspace-actions hidden">
-            <div class="identity-row">
-                <span id="usernameBadge" class="badge">Username</span>
-                <span id="roleBadge" class="badge">Role</span>
-            </div>
-            <button id="topLogoutButton" class="secondary-button" type="button">Logout</button>
-        </div>
-    </header>
+<main>
+    <section>
+        <h1>Login</h1>
+        <p>Enter your account details to view products.</p>
 
-    <section id="loginView" class="login-layout">
-        <div class="panel login-panel">
-            <h2>Login</h2>
-            <p class="subtitle">Use a profile to request a JWT and open the protected product view.</p>
+        <form id="loginForm">
+            <label for="usernameInput">Username</label>
+            <input id="usernameInput" name="username" autocomplete="username" required>
+            <br>
+            <label for="passwordInput">Password</label>
+            <input id="passwordInput" name="password" type="password" autocomplete="current-password" required>
+            <br>
+            <button id="loginButton" type="submit" >Login</button>
+        </form>
 
-            <form id="loginForm" class="form-grid">
-                <label>
-                    Username
-                    <input id="usernameInput" name="username" autocomplete="username">
-                </label>
-                <label>
-                    Password
-                    <input id="passwordInput" name="password" type="password" autocomplete="current-password">
-                </label>
-                <button id="loginButton" class="primary-button" type="submit">Login</button>
-            </form>
+        <p id="loginStatus"></p>
 
-            <div id="loginStatus" class="status">No login attempt yet.</div>
-        </div>
-
-        <aside class="panel side-panel">
-            <h2>Demo Profiles</h2>
-            <table class="demo-table">
-                <thead>
+        <table>
+            <caption><b>Demo users</b></caption>
+            <thead>
                 <tr>
-                    <th>Username</th>
-                    <th>Password</th>
-                    <th>Role</th>
+                    <th scope="col">Username</th>
+                    <th scope="col">Password</th>
                 </tr>
-                </thead>
-                <tbody>
+            </thead>
+            <tbody>
                 <tr>
-                    <td><code>renter1</code></td>
-                    <td><code>renter123</code></td>
-                    <td>USER</td>
+                    <td>renter1</td>
+                    <td>renter123</td>
                 </tr>
                 <tr>
-                    <td><code>renter2</code></td>
-                    <td><code>renter456</code></td>
-                    <td>USER</td>
+                    <td>renter2</td>
+                    <td>renter456</td>
                 </tr>
                 <tr>
-                    <td><code>admin</code></td>
-                    <td><code>admin123</code></td>
-                    <td>ADMIN</td>
+                    <td>admin</td>
+                    <td>admin123</td>
                 </tr>
-                </tbody>
-            </table>
-        </aside>
-    </section>
-
-    <section id="productView" class="panel workspace-panel hidden">
-        <div class="workspace-header">
-            <div>
-                <h2>Product Page</h2>
-                <p class="subtitle">This view loads products from <code>GET /api/products</code> using the JWT.</p>
-            </div>
-        </div>
-
-        <section>
-            <div class="section-title">
-                <h2>JWT</h2>
-            </div>
-            <div id="tokenOutput" class="token-box">No JWT token.</div>
-        </section>
-
-        <section>
-            <div class="section-title">
-                <h2>Products</h2>
-                <span id="productCount" class="badge">0 items</span>
-            </div>
-            <div id="productStatus" class="status">Products have not loaded yet.</div>
-            <div id="productGrid" class="product-grid"></div>
-        </section>
-    </section>
-
-    <section id="unauthorizedView" class="unauthorized hidden">
-        <strong>Login required.</strong>
-        <p id="unauthorizedMessage">A valid JWT is required before the product page can be opened.</p>
-        <button id="backToLoginButton" class="primary-button" type="button">Back to Login</button>
+            </tbody>
+        </table>
     </section>
 </main>
 
