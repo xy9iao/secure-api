@@ -26,6 +26,25 @@ src/main/resources/static/app.js
 database/init.sql
 ```
 
+## Application Flow
+
+1. The student opens the frontend login view: `src/main/resources/static/index.html`.
+2. The login form uses `src/main/resources/static/app.js` to send the username and password to `POST /api/auth/login`.
+3. The request reaches `src/main/java/sg/edu/nus/secure_api/controller/AuthController.java`.
+4. `AuthController.java` calls `src/main/java/sg/edu/nus/secure_api/service/AuthService.java`.
+5. `AuthService.java` checks the username and password using `src/main/java/sg/edu/nus/secure_api/repository/ProfileRepository.java`.
+6. If the login is valid, `AuthService.java` calls `src/main/java/sg/edu/nus/secure_api/service/JwtService.java` to generate a JWT.
+7. `AuthService.java` saves the generated JWT into `generated-jwts.txt`.
+8. The backend returns the JWT to `app.js`.
+9. `app.js` stores the JWT in the browser and sends the user to `src/main/resources/static/product.html`.
+10. `product.html` uses `app.js` to call `GET /api/products` with the JWT in the `Authorization` header.
+11. Before the request reaches the controller, `src/main/java/sg/edu/nus/secure_api/security/JwtAuthenticationFilter.java` checks whether the JWT is valid.
+12. If the JWT is valid, the request reaches `src/main/java/sg/edu/nus/secure_api/controller/ProductController.java`.
+13. `ProductController.java` reads products using `src/main/java/sg/edu/nus/secure_api/repository/ProductRepository.java`.
+14. The product data is returned to `app.js`.
+15. `app.js` displays the final frontend product view inside `product.html`.
+16. If login fails, `app.js` sends the user to `src/main/resources/static/login-failure.html`.
+
 ## Database Setup
 
 Open MySQL Workbench and run:
