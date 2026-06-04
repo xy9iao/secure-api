@@ -9,6 +9,7 @@ import sg.edu.nus.secure_api.service.JwtService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -17,6 +18,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     public static final String AUTH_USERNAME = "authUsername";
     public static final String AUTH_ROLE = "authRole";
+    public static final String AUTH_COOKIE_NAME = "authJwtToken";
 
     private final JwtService jwtService;
 
@@ -38,19 +40,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String authHeader = request.getHeader("Authorization");
+        String token = resolveToken(request);
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            writeError(response, HttpServletResponse.SC_UNAUTHORIZED,
-                    "Unauthorized: JWT token is missing or invalid");
+        if (token == null) {
+            handleUnauthorized(request, response);
             return;
         }
 
-        String token = authHeader.substring(7);
-
         if (!jwtService.isTokenValid(token)) {
-            writeError(response, HttpServletResponse.SC_UNAUTHORIZED,
-                    "Unauthorized: JWT token is missing or invalid");
+            handleUnauthorized(request, response);
             return;
         }
 
@@ -64,7 +62,37 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean isProtectedPath(String path) {
-        return path.startsWith("/api/products");
+        return path.startsWith("/api/products") || path.equals("/products");
+    }
+
+    private String resolveToken(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return null;
+        }
+
+        for (Cookie cookie : cookies) {
+            if (AUTH_COOKIE_NAME.equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+
+        return null;
+    }
+
+    private void handleUnauthorized(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (request.getRequestURI().startsWith("/api/")) {
+            writeError(response, HttpServletResponse.SC_UNAUTHORIZED,
+                    "Unauthorized: JWT token is missing or invalid");
+            return;
+        }
+
+        response.sendRedirect("/login-failure?message=Please+login+before+viewing+products.");
     }
 
     private void writeError(HttpServletResponse response, int status, String message) throws IOException {

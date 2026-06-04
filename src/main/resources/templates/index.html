@@ -11,17 +11,15 @@
         <h1>Login</h1>
         <p>Enter your account details to view products.</p>
 
-        <form id="loginForm">
+        <form action="/login" method="post">
             <label for="usernameInput">Username</label>
             <input id="usernameInput" name="username" autocomplete="username" required>
             <br>
             <label for="passwordInput">Password</label>
             <input id="passwordInput" name="password" type="password" autocomplete="current-password" required>
             <br>
-            <button id="loginButton" type="submit" >Login</button>
+            <button type="submit">Login</button>
         </form>
-
-        <p id="loginStatus"></p>
 
         <table>
             <caption><b>Demo users</b></caption>
@@ -48,7 +46,5 @@
         </table>
     </section>
 </main>
-
-<script src="app.js"></script>
 </body>
 </html>

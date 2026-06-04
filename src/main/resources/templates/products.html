@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products</title>
+</head>
+<body>
+<main>
+    <section>
+        <div>
+            <div>
+                <h1>Products</h1>
+                <p>
+                    Logged in as <strong th:text="${username}">username</strong>
+                    (<span th:text="${role}">role</span>) with a JWT cookie.
+                </p>
+            </div>
+            <form action="/logout" method="post">
+                <button type="submit">Logout</button>
+            </form>
+        </div>
+
+        <h2>Product List</h2>
+        <p th:text="${#lists.size(products) + (#lists.size(products) == 1 ? ' product found.' : ' products found.')}">
+            0 products found.
+        </p>
+
+        <table border="1">
+            <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Owner</th>
+                    <th scope="col">Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="product : ${products}">
+                    <td th:text="${product.name}">Product name</td>
+                    <td th:text="${product.category}">Category</td>
+                    <td th:text="${product.owner}">Owner</td>
+                    <td th:text="${product.description}">Description</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(products)}">
+                    <td colspan="4">No products available.</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>
