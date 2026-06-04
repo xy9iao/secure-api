@@ -11,7 +11,6 @@ Basic Spring Boot and Thymeleaf demo for JWT login.
 - The backend stores the JWT in an `HttpOnly` cookie for the browser.
 - Thymeleaf renders the login, failure, and product pages on the server.
 - Admin users can see all products. Normal users see only their own products.
-- The frontend uses server-rendered HTML forms and tables only. There are no `.js` files or `<script>` tags.
 
 ## Application Flow
 
@@ -77,3 +76,4 @@ The file keeps only the latest tokens. Change this number in:
 ```properties
 jwt.output-max-entries=5
 ```
+
