@@ -11,7 +11,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import sg.edu.nus.secure_api.model.LoginResponse;
 import sg.edu.nus.secure_api.model.Profile;
 import sg.edu.nus.secure_api.repository.ProfileRepository;
 
@@ -35,7 +34,7 @@ public class AuthService {
         this.jwtOutputMaxEntries = Math.max(1, jwtOutputMaxEntries);
     }
 
-    public LoginResponse login(String username, String password) {
+    public String login(String username, String password) {
         Profile profile = profileRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid username or password"));
 
@@ -46,7 +45,7 @@ public class AuthService {
         String token = jwtService.generateToken(profile.getUsername(), profile.getRole());
         saveTokenToLocalFile(profile.getUsername(), token);
 
-        return new LoginResponse(token);
+        return token;
     }
 
     private void saveTokenToLocalFile(String username, String token) {

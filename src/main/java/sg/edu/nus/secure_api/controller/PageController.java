@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.servlet.http.HttpServletResponse;
-import sg.edu.nus.secure_api.model.LoginResponse;
 import sg.edu.nus.secure_api.model.Product;
 import sg.edu.nus.secure_api.repository.ProductRepository;
 import sg.edu.nus.secure_api.security.JwtAuthenticationFilter;
@@ -41,13 +40,11 @@ public class PageController {
             HttpServletResponse response
     ) {
         try {
-            LoginResponse loginResponse = authService.login(username, password);
-            response.addHeader(HttpHeaders.SET_COOKIE, buildLoginCookie(loginResponse.getToken()).toString());
+            String token = authService.login(username, password);
+            response.addHeader(HttpHeaders.SET_COOKIE, buildLoginCookie(token).toString());
             return "redirect:/products";
-        } catch (IllegalArgumentException e) {
-            return "redirect:/login-failure?message=Invalid+username+or+password";
         } catch (RuntimeException e) {
-            return "redirect:/login-failure?message=Login+failed";
+            return "redirect:/login-failure";
         }
     }
 
@@ -75,11 +72,7 @@ public class PageController {
     }
 
     @GetMapping("/login-failure")
-    public String loginFailure(
-            @RequestParam(defaultValue = "Invalid username or password.") String message,
-            Model model
-    ) {
-        model.addAttribute("message", message);
+    public String loginFailure() {
         return "login-failure";
     }
 

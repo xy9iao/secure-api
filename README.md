@@ -1,6 +1,6 @@
-# Secure API JWT Demo
+# Spring Boot JWT Demo
 
-Basic Spring Boot demo for JWT login.
+Basic Spring Boot and Thymeleaf demo for JWT login.
 
 ## Features
 
@@ -13,20 +13,6 @@ Basic Spring Boot demo for JWT login.
 - Admin users can see all products. Normal users see only their own products.
 - The frontend uses server-rendered HTML forms and tables only. There are no `.js` files or `<script>` tags.
 
-## Main Files
-
-```text
-src/main/java/sg/edu/nus/secure_api/controller/AuthController.java
-src/main/java/sg/edu/nus/secure_api/controller/ProductController.java
-src/main/java/sg/edu/nus/secure_api/security/JwtAuthenticationFilter.java
-src/main/java/sg/edu/nus/secure_api/service/AuthService.java
-src/main/java/sg/edu/nus/secure_api/service/JwtService.java
-src/main/resources/templates/index.html
-src/main/resources/templates/products.html
-src/main/resources/templates/login-failure.html
-database/init.sql
-```
-
 ## Application Flow
 
 1. The student opens the frontend login view at `/`.
@@ -34,16 +20,14 @@ database/init.sql
 3. The login form submits username and password to `POST /login`.
 4. The request reaches `src/main/java/sg/edu/nus/secure_api/controller/PageController.java`.
 5. `PageController.java` calls `src/main/java/sg/edu/nus/secure_api/service/AuthService.java`.
-5. `AuthService.java` checks the username and password using `src/main/java/sg/edu/nus/secure_api/repository/ProfileRepository.java`.
-6. If the login is valid, `AuthService.java` calls `src/main/java/sg/edu/nus/secure_api/service/JwtService.java` to generate a JWT.
-7. `AuthService.java` saves the generated JWT into `generated-jwts.txt`.
-8. `PageController.java` stores the JWT in an `HttpOnly` cookie and redirects to `/products`.
-9. Before `/products` reaches the controller, `src/main/java/sg/edu/nus/secure_api/security/JwtAuthenticationFilter.java` checks whether the JWT cookie is valid.
-10. If the JWT is valid, `PageController.java` reads products using `src/main/java/sg/edu/nus/secure_api/repository/ProductRepository.java`.
-11. Spring MVC renders the final product view with `src/main/resources/templates/products.html`.
-12. If login fails, Spring MVC redirects to `/login-failure` and renders `src/main/resources/templates/login-failure.html`.
-
-`GET /api/products` still accepts the standard `Authorization: Bearer <jwt>` header for API testing.
+6. `AuthService.java` checks the username and password using `src/main/java/sg/edu/nus/secure_api/repository/ProfileRepository.java`.
+7. If the login is valid, `AuthService.java` calls `src/main/java/sg/edu/nus/secure_api/service/JwtService.java` to generate a JWT.
+8. `AuthService.java` saves the generated JWT into `generated-jwts.txt`.
+9. `PageController.java` stores the JWT in an `HttpOnly` cookie and redirects to `/products`.
+10. Before `/products` reaches the controller, `src/main/java/sg/edu/nus/secure_api/security/JwtAuthenticationFilter.java` checks whether the JWT cookie is valid.
+11. If the JWT is valid, `PageController.java` reads products using `src/main/java/sg/edu/nus/secure_api/repository/ProductRepository.java`.
+12. Spring MVC renders the final product view with `src/main/resources/templates/products.html`.
+13. If login fails, Spring MVC redirects to `/login-failure` and renders `src/main/resources/templates/login-failure.html`.
 
 ## Database Setup
 

@@ -43,12 +43,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = resolveToken(request);
 
         if (token == null) {
-            handleUnauthorized(request, response);
+            handleUnauthorized(response);
             return;
         }
 
         if (!jwtService.isTokenValid(token)) {
-            handleUnauthorized(request, response);
+            handleUnauthorized(response);
             return;
         }
 
@@ -62,15 +62,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean isProtectedPath(String path) {
-        return path.startsWith("/api/products") || path.equals("/products");
+        return path.equals("/products");
     }
 
     private String resolveToken(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.substring(7);
-        }
-
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
             return null;
@@ -85,19 +80,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return null;
     }
 
-    private void handleUnauthorized(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        if (request.getRequestURI().startsWith("/api/")) {
-            writeError(response, HttpServletResponse.SC_UNAUTHORIZED,
-                    "Unauthorized: JWT token is missing or invalid");
-            return;
-        }
-
-        response.sendRedirect("/login-failure?message=Please+login+before+viewing+products.");
-    }
-
-    private void writeError(HttpServletResponse response, int status, String message) throws IOException {
-        response.setStatus(status);
-        response.setContentType("text/plain");
-        response.getWriter().write(message);
+    private void handleUnauthorized(HttpServletResponse response) throws IOException {
+        response.sendRedirect("/login-failure");
     }
 }
