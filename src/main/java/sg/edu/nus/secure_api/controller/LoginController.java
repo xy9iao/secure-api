@@ -1,31 +1,23 @@
 package sg.edu.nus.secure_api.controller;
 
-import java.util.List;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.servlet.http.HttpServletResponse;
-import sg.edu.nus.secure_api.model.Product;
-import sg.edu.nus.secure_api.repository.ProductRepository;
 import sg.edu.nus.secure_api.security.JwtAuthenticationFilter;
 import sg.edu.nus.secure_api.service.AuthService;
 
 @Controller
-public class PageController {
+public class LoginController {
 
     private final AuthService authService;
-    private final ProductRepository productRepository;
 
-    public PageController(AuthService authService, ProductRepository productRepository) {
+    public LoginController(AuthService authService) {
         this.authService = authService;
-        this.productRepository = productRepository;
     }
 
     @GetMapping("/")
@@ -46,23 +38,6 @@ public class PageController {
         } catch (RuntimeException e) {
             return "redirect:/login-failure";
         }
-    }
-
-    @GetMapping("/products")
-    public String products(
-            @RequestAttribute(JwtAuthenticationFilter.AUTH_USERNAME) String username,
-            @RequestAttribute(JwtAuthenticationFilter.AUTH_ROLE) String role,
-            Model model
-    ) {
-        List<Product> products = "ADMIN".equals(role)
-                ? productRepository.findAll()
-                : productRepository.findByOwner(username);
-
-        model.addAttribute("username", username);
-        model.addAttribute("role", role);
-        model.addAttribute("products", products);
-
-        return "products";
     }
 
     @PostMapping("/logout")

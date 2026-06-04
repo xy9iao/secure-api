@@ -62,10 +62,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean isProtectedPath(String path) {
-        return path.equals("/products");
+        return path.equals("/products") || path.equals("/api/products");
     }
 
     private String resolveToken(HttpServletRequest request) {
+        String path = request.getRequestURI();
+
+        if (path.equals("/products")) {
+            return resolveTokenFromCookie(request);
+        }
+
+        if (path.equals("/api/products")) {
+            return resolveTokenFromAuthorizationHeader(request);
+        }
+
+        return null;
+    }
+
+    private String resolveTokenFromAuthorizationHeader(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+
+        return null;
+    }
+
+    private String resolveTokenFromCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
             return null;
