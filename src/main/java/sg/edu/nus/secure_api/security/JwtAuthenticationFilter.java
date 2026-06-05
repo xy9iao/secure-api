@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import io.jsonwebtoken.Claims;
 import sg.edu.nus.secure_api.service.JwtService;
 
 import jakarta.servlet.FilterChain;
@@ -47,13 +48,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (!jwtService.isTokenValid(token)) {
+        Claims claims;
+        try {
+            claims = jwtService.authenticateToken(token);
+        } catch (Exception e) {
             handleUnauthorized(response);
             return;
         }
 
-        String username = jwtService.extractUsername(token);
-        String role = jwtService.extractRole(token);
+        String username = claims.getSubject();
+        String role = claims.get("role", String.class);
 
         request.setAttribute(AUTH_USERNAME, username);
         request.setAttribute(AUTH_ROLE, role);
