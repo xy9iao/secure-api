@@ -1,11 +1,15 @@
 package sg.edu.nus.secure_api.service;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HexFormat;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -38,7 +42,7 @@ public class AuthService {
         Profile profile = profileRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid username or password"));
 
-        if (!profile.getPassword().equals(password)) {
+        if (!profile.getPassword().equals(sha512(password))) {
             throw new IllegalArgumentException("Invalid username or password");
         }
 
@@ -46,6 +50,16 @@ public class AuthService {
         saveTokenToLocalFile(profile.getUsername(), token);
 
         return token;
+    }
+
+    private String sha512(String value) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-512");
+            byte[] hash = digest.digest(value.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void saveTokenToLocalFile(String username, String token) {
